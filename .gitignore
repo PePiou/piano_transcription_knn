@@ -1,0 +1,19 @@
+venv/
+__pycache__/
+*.pyc
+data/
+models/
+*.pkl
+*.joblib
+*.wav
+*.mp3
+.vscode/
+.vs/
+Thumbs.db
+.DS_Store
+# Garder la doc dans data et un fichier vide pour versionner le dossier
+!data/README.md
+!data/.gitkeep
+
+# Autoriser de petits exemples audio
+!examples/*.wav
