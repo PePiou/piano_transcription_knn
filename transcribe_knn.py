@@ -67,4 +67,4 @@ if __name__ == "__main__":
     events = frames_to_events(notes)
     write_midi(events, args.midi)
 
-    print(f"✅ MIDI généré ({len(events)} notes) → {args.midi}")
+    print(f" MIDI généré ({len(events)} notes) → {args.midi}")
