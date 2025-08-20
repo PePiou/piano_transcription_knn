@@ -45,4 +45,4 @@ with open(CSV_OUT, "w", newline="") as f:
     for wav in tqdm.tqdm(files, desc="Extract"):
         wr.writerow([*wav_to_vec(wav), midi_from_name(wav)])
 
-print("✅ Dataset écrit :", CSV_OUT)
+print("Dataset écrit :", CSV_OUT)
