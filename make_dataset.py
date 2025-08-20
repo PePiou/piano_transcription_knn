@@ -1,9 +1,7 @@
-import glob
 import librosa
 import numpy as np
 import csv
 import os
-import tqdm
 
 DATA = Path("piano_notes")     # dossier où se trouvent les fichiers .aiff avec les enregistrements de notes*
 FILES = sorted(DATA.glob("*.ai*"))
