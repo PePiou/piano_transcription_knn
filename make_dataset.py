@@ -1,6 +1,6 @@
 import librosa
 import numpy as np
-from pathlib import path
+from pathlib import Path
 import csv
 import os
 
@@ -41,9 +41,9 @@ def audio_to_vec(path: str) -> np.ndarray:
     'C7': 96, 'C#7': 97, 'Db7': 97, 'D7': 98, 'D#7': 99, 'Eb7': 99, 'E7': 100, 'F7': 101, 'F#7': 102, 'Gb7': 102, 'G7': 103, 'G#7': 104, 'Ab7': 104, 'A7': 105, 'A#7': 106, 'Bb7': 106, 'B7': 107,
     'C8': 108,}
 
-def name_to_midi(path: str) -> int:
+def name_to_midi(filepath: str) -> int:
     """Extrait le numéro MIDI du nom de fichier"""
-    name = os.path.basename(path)          # Piano.mf.C4.aiff
+    name = os.path.basename(filepath)          # Piano.mf.C4.aiff
     stem, _ = os.path.splitext(name)   
     note = stem.split('.')[-1]             # -> "C4"
     note = note.replace('♯', '#').replace('♭', 'b').strip()
