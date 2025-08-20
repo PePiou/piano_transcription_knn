@@ -4,14 +4,17 @@ import numpy as np
 import csv
 import os
 import tqdm
-DATA = os.path.join(os.path.expanduser("~"), "Downloads", "piano_notes")     # dossier où se trouvent les sous-dossiers ISOL_*
-PATTERN = os.path.join(DATA, "Piano*.ai*")
+
+DATA = Path("piano_notes")     # dossier où se trouvent les fichiers .aiff avec les enregistrements de notes*
+FILES = sorted(DATA.glob("*.ai*"))
 CSV_OUT  = "Piano_notes_train.csv"
+
 SR      = 44100                # fréquence d’échantillonnage (Hz)
 N_FFT   = 2048                 # taille FFT
 HOP     = 256 
-def wav_to_vec(path: str) -> np.ndarray:
-    """WAV mono -> vecteur 88 dim (énergie par touche piano)."""
+
+def audio_to_vec(path: str) -> np.ndarray:
+    """AIFF/Audio mono -> vecteur 88 dim (énergie par touche)."""
     y, _ = librosa.load(path, sr=SR, mono=True)
     S = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP)).mean(axis=1)
     freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
@@ -23,17 +26,12 @@ def wav_to_vec(path: str) -> np.ndarray:
         midi = int(round(69 + 12 * np.log2(f / 440)))
         if 21 <= midi <= 108:
             vec[midi - 21] += mag
-            if vec.sum() != 0:
-                vec /= vec.sum()    # normalisation
-    return vec
-def name_to_midi(path: str) -> int:
-    """Extrait le numéro MIDI du nom de fichier"""
-    name = os.path.basename(path)          # Piano.mf.C4.aiff
-    stem, _ = os.path.splitext(name)   
-    note = stem.split('.')[-1]             # -> "C4"
-    note = note.replace('♯', '#').replace('♭', 'b').strip()
 
-    pc_map = {
+    if vec.sum() != 0:
+        vec /= vec.sum()  # normalisation
+    return vec
+
+  pc_map = {
     'A0': 21, 'A#0': 22, 'Bb0': 22, 'B0': 23,
     'C1': 24, 'C#1': 25, 'Db1': 25, 'D1': 26, 'D#1': 27, 'Eb1': 27, 'E1': 28, 'F1': 29, 'F#1': 30, 'Gb1': 30, 'G1': 31, 'G#1': 32, 'Ab1': 32, 'A1': 33, 'A#1': 34, 'Bb1': 34, 'B1': 35,
     'C2': 36, 'C#2': 37, 'Db2': 37, 'D2': 38, 'D#2': 39, 'Eb2': 39, 'E2': 40, 'F2': 41, 'F#2': 42, 'Gb2': 42, 'G2': 43, 'G#2': 44, 'Ab2': 44, 'A2': 45, 'A#2': 46, 'Bb2': 46, 'B2': 47,
@@ -44,17 +42,25 @@ def name_to_midi(path: str) -> int:
     'C7': 96, 'C#7': 97, 'Db7': 97, 'D7': 98, 'D#7': 99, 'Eb7': 99, 'E7': 100, 'F7': 101, 'F#7': 102, 'Gb7': 102, 'G7': 103, 'G#7': 104, 'Ab7': 104, 'A7': 105, 'A#7': 106, 'Bb7': 106, 'B7': 107,
     'C8': 108,}
 
-    pitch_class = pc_map[note[:-1]]
+def name_to_midi(path: str) -> int:
+    """Extrait le numéro MIDI du nom de fichier"""
+    name = os.path.basename(path)          # Piano.mf.C4.aiff
+    stem, _ = os.path.splitext(name)   
+    note = stem.split('.')[-1]             # -> "C4"
+    note = note.replace('♯', '#').replace('♭', 'b').strip()
       try:
         return pc_map[note]
     except KeyError:
         raise ValueError(f"Note inconnue dans le nom '{name}' ")
-files = glob.glob(PATTERN)
-print(f"{len(files)} fichiers WAV isolés trouvés")
+        
+print(f"{len(FILES)} fichiers audios trouvés")
 
 with open(CSV_OUT, "w", newline="") as f:
-    wr = csv.writer(f)
-    for wav in tqdm.tqdm(files, desc="Extract"):
-        wr.writerow([*wav_to_vec(wav), name_to_midi(wav)])
+    w = csv.writer(f)
+    w.writerow([f"feat_{i}" for i in range(88)] + ["midi"])
+    for p in FILES:
+        vec = audio_to_vec(str(p))          # np.array de longueur 88
+        midi = name_to_midi(str(p))         # entier 21..108
+        w.writerow(vec.tolist() + [midi])   # on écrit les 88 valeurs + le label
 
-print("Dataset écrit :", CSV_OUT)
+print(f"OK -> {CSV_OUT}")
