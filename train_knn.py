@@ -27,4 +27,4 @@ pipe = make_pipeline(
 pipe.fit(X, y)
 
 joblib.dump(pipe, MODEL_OUT)
-print("✅ Modèle sauvegardé :", MODEL_OUT)
+print(" Modèle sauvegardé :", MODEL_OUT)
