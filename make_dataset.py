@@ -1,5 +1,6 @@
 import librosa
 import numpy as np
+from pathlib import path
 import csv
 import os
 
@@ -50,8 +51,6 @@ def name_to_midi(path: str) -> int:
         return pc_map[note]
     except KeyError:
         raise ValueError(f"Note inconnue dans le nom '{name}' ")
-        
-print(f"{len(FILES)} fichiers audios trouvés")
 
 with open(CSV_OUT, "w", newline="") as f:
     w = csv.writer(f)
