@@ -59,9 +59,11 @@ def write_midi(events, out_path, tempo=500_000, ppq=480):
 
 
 if __name__ == "__main__":
-    X      = wav_to_mat(args.audio)
-    notes  = MODEL.predict(X)
-    events = frames_to_events(notes)
-    write_midi(events, args.midi)
+    AUDIO = "melodie.wav"   # ← mets ici ton .wav
+    MIDI  = "melodie.mid"   # ← nom du fichier .mid de sortie
 
-    print(f" MIDI généré ({len(events)} notes) → {args.midi}")
+    X = wav_to_mat(AUDIO)
+    notes = MODEL.predict(X).astype(int)
+    events = frames_to_events(notes)
+    write_midi(events, MIDI)
+    print(f"MIDI généré ({len(events)} notes) → {MIDI}")
