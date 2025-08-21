@@ -1,4 +1,3 @@
-import argparse
 import librosa
 import numpy as np
 import joblib
@@ -60,11 +59,6 @@ def write_midi(events, out_path, tempo=500_000, ppq=480):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--audio", required=True, help="WAV mono 44 kHz")
-    ap.add_argument("--midi",  required=True, help="chemin de sortie .mid")
-    args = ap.parse_args()
-
     X      = wav_to_mat(args.audio)
     notes  = MODEL.predict(X)
     events = frames_to_events(notes)
