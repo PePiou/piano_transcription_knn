@@ -12,22 +12,36 @@ SR      = 44100                # fréquence d’échantillonnage (Hz)
 N_FFT   = 2048                 # taille FFT
 HOP     = 256 
 
-def audio_to_vec(path: str) -> np.ndarray:
-    """AIFF/Audio mono -> vecteur 88 dim (énergie par touche)."""
-    y, _ = librosa.load(path, sr=SR, mono=True)
-    S = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP)).mean(axis=1)
-    freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
+import numpy as np
+import librosa
 
+SR    = 44100
+N_FFT = 2048
+HOP   = 256
+
+# seuil relatif: on garde les fenêtres dont le RMS ≥ 10% du max
+RMS_REL_THRESH = 0.10
+
+def audio_to_vec(path: str) -> np.ndarray:
+    """AIFF/Audio mono -> vecteur 88 dim (énergie par touche)"""
+    y, _ = librosa.load(path, sr=SR, mono=True)
+    M = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP))   
+   
+    rms = librosa.feature.rms(S=M)[0]
+    thr = RMS_REL_THRESH * (rms.max() if rms.size else 0.0)
+    mask = (rms >= thr) if thr > 0 else np.ones_like(rms, dtype=bool)
+    S = M[:, mask].mean(axis=1) if mask.any() else M.mean(axis=1)
+    freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
     vec = np.zeros(88)
     for mag, f in zip(S, freqs):
-        if f < 20:
-            continue
-        midi = int(round(69 + 12 * np.log2(f / 440)))
+        if f <= 0:                 
+            continue              
+        midi = int(round(69 + 12 * np.log2(f / 440.0)))
         if 21 <= midi <= 108:
             vec[midi - 21] += mag
-
     if vec.sum() != 0:
-        vec /= vec.sum()  # normalisation
+        vec /= vec.sum()
+
     return vec
 
 pc_map = {
