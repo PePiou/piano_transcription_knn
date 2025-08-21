@@ -20,6 +20,8 @@ def wav_to_mat(path: str) -> np.ndarray:
 
     V = np.zeros((S.shape[1], 88), dtype=np.float32)
     for k, f in enumerate(freqs):
+        if f <= 0: 
+        continue
         midi = int(round(69 + 12 * np.log2(f / 440)))
         if 21 <= midi <= 108:
             V[:, midi - 21] += S[k]
