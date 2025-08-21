@@ -23,25 +23,36 @@ HOP   = 256
 RMS_REL_THRESH = 0.10
 
 def audio_to_vec(path: str) -> np.ndarray:
-    """AIFF/Audio mono -> vecteur 88 dim (énergie par touche)"""
+    """Audio mono -> vecteur 88 dim"""
     y, _ = librosa.load(path, sr=SR, mono=True)
-    M = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP))   
-   
-    rms = librosa.feature.rms(S=M)[0]
-    thr = RMS_REL_THRESH * (rms.max() if rms.size else 0.0)
-    mask = (rms >= thr) if thr > 0 else np.ones_like(rms, dtype=bool)
-    S = M[:, mask].mean(axis=1) if mask.any() else M.mean(axis=1)
-    freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
-    vec = np.zeros(88)
-    for mag, f in zip(S, freqs):
-        if f <= 0:                 
-            continue              
-        midi = int(round(69 + 12 * np.log2(f / 440.0)))
-        if 21 <= midi <= 108:
-            vec[midi - 21] += mag
-    if vec.sum() != 0:
-        vec /= vec.sum()
+    M = np.abs(librosa.stft(y, n_fft=N_FFT, hop_length=HOP)) 
 
+    rms = librosa.feature.rms(S=M)[0]        
+    thr = RMS_REL_THRESH * rms.max()           
+
+    S_sum = np.zeros(M.shape[0], dtype=M.dtype)  
+    count = 0
+    for i, r in enumerate(rms):               
+        if r >= thr:
+            S_sum += M[:, i]                  
+            count += 1
+
+    S_mean = (S_sum / count) if count > 0 else M.mean(axis=1)
+
+    # Regroupement par touches MIDI (21..108)
+    freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
+    vec = np.zeros(88, dtype=np.float32)
+    for mag, f in zip(S_mean, freqs):
+        if f <= 0:                     # on ignore le bin DC
+            continue
+        midi = int(round(69 + 12*np.log2(f/440.0)))
+        if 21 <= midi <= 108:
+            vec[midi - 21] += float(mag)
+
+    # Normalisation L1 (mêmes conventions que ton dataset)
+    tot = vec.sum()
+    if tot > 0:
+        vec /= tot
     return vec
 
 pc_map = {
