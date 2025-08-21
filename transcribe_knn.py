@@ -23,7 +23,8 @@ def wav_to_mat(path: str) -> np.ndarray:
         midi = int(round(69 + 12 * np.log2(f / 440)))
         if 21 <= midi <= 108:
             V[:, midi - 21] += S[k]
-    V /= V.sum(axis=1, keepdims=True) + 1e-12
+    if V.sum(axis=1, keepdims=True) != 0:
+    V /= V.sum(axis=1, keepdims=True) 
     return V
 
 
