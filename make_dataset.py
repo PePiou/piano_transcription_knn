@@ -36,7 +36,7 @@ def audio_to_vec(path: str) -> np.ndarray:
             S_sum += M[:, i]                  
             count += 1
 
-    S_mean = (S_sum / count) if count > 0 else M.mean(axis=1)
+    S_mean = (S_sum / count)
 
     freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
     vec = np.zeros(88, dtype=np.float32)
