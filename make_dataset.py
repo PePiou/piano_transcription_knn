@@ -19,8 +19,7 @@ SR    = 44100
 N_FFT = 2048
 HOP   = 256
 
-# seuil relatif: on garde les fenêtres dont le RMS ≥ 10% du max
-RMS_REL_THRESH = 0.10
+RMS_REL_THRESH = 0.10             # seuil relatif: on garde les fenêtres dont le RMS ≥ 10% du max
 
 def audio_to_vec(path: str) -> np.ndarray:
     """Audio mono -> vecteur 88 dim"""
@@ -39,7 +38,6 @@ def audio_to_vec(path: str) -> np.ndarray:
 
     S_mean = (S_sum / count) if count > 0 else M.mean(axis=1)
 
-    # Regroupement par touches MIDI (21..108)
     freqs = librosa.fft_frequencies(sr=SR, n_fft=N_FFT)
     vec = np.zeros(88, dtype=np.float32)
     for mag, f in zip(S_mean, freqs):
@@ -48,8 +46,6 @@ def audio_to_vec(path: str) -> np.ndarray:
         midi = int(round(69 + 12*np.log2(f/440.0)))
         if 21 <= midi <= 108:
             vec[midi - 21] += float(mag)
-
-    # Normalisation L1 (mêmes conventions que ton dataset)
     tot = vec.sum()
     if tot > 0:
         vec /= tot
