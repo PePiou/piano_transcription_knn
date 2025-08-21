@@ -2,7 +2,7 @@ import csv
 import numpy as np
 import joblib
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import Normalizer
 from sklearn.pipeline import make_pipeline
 
 CSV_IN   = "piano_notes_train.csv" 
@@ -22,8 +22,8 @@ y = np.asarray(y, dtype=np.int16)
 
 # pipeline : normalisation + KNN -------------------------------------------
 pipe = make_pipeline(
-    StandardScaler(),
-    KNeighborsClassifier(n_neighbors=5, metric="euclidean")
+    Normalizer(norm="l2"),
+    KNeighborsClassifier(n_neighbors=1, metric="euclidean")
 )
 pipe.fit(X, y)
 
