@@ -30,7 +30,7 @@ def audio_to_vec(path: str) -> np.ndarray:
         vec /= vec.sum()  # normalisation
     return vec
 
-  pc_map = {
+pc_map = {
     'A0': 21, 'A#0': 22, 'Bb0': 22, 'B0': 23,
     'C1': 24, 'C#1': 25, 'Db1': 25, 'D1': 26, 'D#1': 27, 'Eb1': 27, 'E1': 28, 'F1': 29, 'F#1': 30, 'Gb1': 30, 'G1': 31, 'G#1': 32, 'Ab1': 32, 'A1': 33, 'A#1': 34, 'Bb1': 34, 'B1': 35,
     'C2': 36, 'C#2': 37, 'Db2': 37, 'D2': 38, 'D#2': 39, 'Eb2': 39, 'E2': 40, 'F2': 41, 'F#2': 42, 'Gb2': 42, 'G2': 43, 'G#2': 44, 'Ab2': 44, 'A2': 45, 'A#2': 46, 'Bb2': 46, 'B2': 47,
@@ -47,7 +47,7 @@ def name_to_midi(filepath: str) -> int:
     stem, _ = os.path.splitext(name)   
     note = stem.split('.')[-1]             # -> "C4"
     note = note.replace('♯', '#').replace('♭', 'b').strip()
-      try:
+    try:
         return pc_map[note]
     except KeyError:
         raise ValueError(f"Note inconnue dans le nom '{name}' ")
